@@ -1,0 +1,32 @@
+name: M3U Listesini Otomatik Guncelle
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Her 6 saatte bir kodu otomatik çalıştırır
+  workflow_dispatch: # İsterseniz GitHub panelinden elle tetikleme butonu ekler
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Depoyu Klonla
+      uses: actions/checkout@v3
+
+    - name: Python Kurulumu
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Bağımlılıkları Yükle
+      run: |
+        pip install -r requirements.txt
+
+    - name: Scripti Çalıştır
+      run: python hollanda_iptv.py
+
+    - name: Değişiklikleri Kaydet ve GitHub'a Yükle
+      run: |
+        git config --global user.name 'GitHub Action Bot'
+        git config --global user.email 'action@github.com'
+        git add hollanda_muzik_kanallari.m3u
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Otomatik M3U Güncellemesi" && git push)
